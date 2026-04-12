@@ -1,0 +1,475 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.brand_lookup": {
+      "name": "brand_lookup",
+      "schema": "",
+      "columns": {
+        "brand_id": {
+          "name": "brand_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.yarn_products": {
+      "name": "yarn_products",
+      "schema": "",
+      "columns": {
+        "product_id": {
+          "name": "product_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "brand_id": {
+          "name": "brand_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight_id": {
+          "name": "weight_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fiber_id": {
+          "name": "fiber_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ix_yarn_products_brand_id": {
+          "name": "ix_yarn_products_brand_id",
+          "columns": [
+            {
+              "expression": "brand_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_yarn_products_fiber_id": {
+          "name": "ix_yarn_products_fiber_id",
+          "columns": [
+            {
+              "expression": "fiber_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_yarn_products_weight_id": {
+          "name": "ix_yarn_products_weight_id",
+          "columns": [
+            {
+              "expression": "weight_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_yarn_products_brand": {
+          "name": "fk_yarn_products_brand",
+          "tableFrom": "yarn_products",
+          "tableTo": "brand_lookup",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "brand_id"
+          ],
+          "columnsTo": [
+            "brand_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_yarn_products_weight": {
+          "name": "fk_yarn_products_weight",
+          "tableFrom": "yarn_products",
+          "tableTo": "weight_lookup",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "weight_id"
+          ],
+          "columnsTo": [
+            "weight_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_yarn_products_fiber": {
+          "name": "fk_yarn_products_fiber",
+          "tableFrom": "yarn_products",
+          "tableTo": "fiber_lookup",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "fiber_id"
+          ],
+          "columnsTo": [
+            "fiber_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.weight_lookup": {
+      "name": "weight_lookup",
+      "schema": "",
+      "columns": {
+        "weight_id": {
+          "name": "weight_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.fiber_lookup": {
+      "name": "fiber_lookup",
+      "schema": "",
+      "columns": {
+        "fiber_id": {
+          "name": "fiber_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.yarn_stash": {
+      "name": "yarn_stash",
+      "schema": "",
+      "columns": {
+        "yarn_id": {
+          "name": "yarn_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "yards": {
+          "name": "yards",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ix_yarn_stash_product_id": {
+          "name": "ix_yarn_stash_product_id",
+          "columns": [
+            {
+              "expression": "product_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_yarn_stash_product": {
+          "name": "fk_yarn_stash_product",
+          "tableFrom": "yarn_stash",
+          "tableTo": "yarn_products",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "product_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.patterns": {
+      "name": "patterns",
+      "schema": "",
+      "columns": {
+        "pattern_id": {
+          "name": "pattern_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "link": {
+          "name": "link",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recommended_weight_id": {
+          "name": "recommended_weight_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "yardage": {
+          "name": "yardage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ix_patterns_recommended_weight_id": {
+          "name": "ix_patterns_recommended_weight_id",
+          "columns": [
+            {
+              "expression": "recommended_weight_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_patterns_recommended_weight": {
+          "name": "fk_patterns_recommended_weight",
+          "tableFrom": "patterns",
+          "tableTo": "weight_lookup",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "recommended_weight_id"
+          ],
+          "columnsTo": [
+            "weight_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.finished_projects": {
+      "name": "finished_projects",
+      "schema": "",
+      "columns": {
+        "finished_project_id": {
+          "name": "finished_project_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "yarn_id": {
+          "name": "yarn_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pattern_id": {
+          "name": "pattern_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ix_finished_projects_pattern_id": {
+          "name": "ix_finished_projects_pattern_id",
+          "columns": [
+            {
+              "expression": "pattern_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_finished_projects_yarn_id": {
+          "name": "ix_finished_projects_yarn_id",
+          "columns": [
+            {
+              "expression": "yarn_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int8_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_finished_projects_yarn": {
+          "name": "fk_finished_projects_yarn",
+          "tableFrom": "finished_projects",
+          "tableTo": "yarn_stash",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "yarn_id"
+          ],
+          "columnsTo": [
+            "yarn_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_finished_projects_pattern": {
+          "name": "fk_finished_projects_pattern",
+          "tableFrom": "finished_projects",
+          "tableTo": "patterns",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "pattern_id"
+          ],
+          "columnsTo": [
+            "pattern_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}
