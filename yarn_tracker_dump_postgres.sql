@@ -44,15 +44,15 @@ CREATE TABLE yarn_products (
 
   CONSTRAINT fk_yarn_products_brand
     FOREIGN KEY (brand_id) REFERENCES brand_lookup (brand_id)
-    ON DELETE CASCADE,
+    ON DELETE RESTRICT,
 
   CONSTRAINT fk_yarn_products_weight
     FOREIGN KEY (weight_id) REFERENCES weight_lookup (weight_id)
-    ON DELETE CASCADE,
+    ON DELETE RESTRICT,
 
   CONSTRAINT fk_yarn_products_fiber
     FOREIGN KEY (fiber_id) REFERENCES fiber_lookup (fiber_id)
-    ON DELETE CASCADE
+    ON DELETE RESTRICT
 );
 
 CREATE TABLE yarn_stash (
@@ -63,7 +63,7 @@ CREATE TABLE yarn_stash (
 
   CONSTRAINT fk_yarn_stash_product
     FOREIGN KEY (product_id) REFERENCES yarn_products (product_id)
-    ON DELETE CASCADE
+    ON DELETE RESTRICT
 );
 
 CREATE TABLE patterns (
@@ -75,7 +75,7 @@ CREATE TABLE patterns (
 
   CONSTRAINT fk_patterns_recommended_weight
     FOREIGN KEY (recommended_weight_id) REFERENCES weight_lookup (weight_id)
-    ON DELETE CASCADE
+    ON DELETE RESTRICT
 );
 
 -- ----------------------------
@@ -90,11 +90,11 @@ CREATE TABLE finished_projects (
 
   CONSTRAINT fk_finished_projects_yarn
     FOREIGN KEY (yarn_id) REFERENCES yarn_stash (yarn_id)
-    ON DELETE CASCADE,
+    ON DELETE RESTRICT,
 
   CONSTRAINT fk_finished_projects_pattern
     FOREIGN KEY (pattern_id) REFERENCES patterns (pattern_id)
-    ON DELETE CASCADE
+    ON DELETE RESTRICT
 );
 
 -- Helpful indexes for joins (optional but recommended)
