@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import { brandsRoutes } from './routes/yarn_brands.js';
+
 
 const fastify = Fastify({
   logger: true,

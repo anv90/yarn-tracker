@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { brandLookup, yarnProducts, weightLookup, fiberLookup, yarnStash, patterns, finishedProjects } from "./schema";
+import { brandLookup, yarnProducts, weightLookup, fiberLookup, yarnStash, patterns, finishedProjects } from "./schema.js";
 
 export const yarnProductsRelations = relations(yarnProducts, ({one, many}) => ({
 	brandLookup: one(brandLookup, {
