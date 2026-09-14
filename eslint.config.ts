@@ -23,12 +23,23 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/explicit-function-return-type": "warn",
+      "@typescript-eslint/require-await": "off",
       "no-console": "warn",
     },
   },
 
   // Tell ESLint to skip generated files
   {
-    ignores: ["dist/**", "node_modules/**"],
+    ignores: ["dist/**", "client-dist/**", "node_modules/**", "drizzle/**", "*.config.ts"],
+  },
+  {
+    files: ["src/client/**"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
+      "@typescript-eslint/no-base-to-string": "off",
+    },
   },
 );

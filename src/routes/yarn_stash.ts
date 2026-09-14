@@ -1,115 +1,15 @@
-import { type FastifyPluginAsync } from "fastify";
 import { eq } from "drizzle-orm";
-import { yarnProducts, yarnStash } from "../../drizzle/schema.js";
+import type { FastifyPluginAsync } from "fastify";
+import { yarnStash } from "../../drizzle/schema.js";
 import { db } from "../db/index.js";
+import { notFound, stashQuery } from "./shared.js";
 
+const stashBody = { type: "object", additionalProperties: false, properties: { productId: { type: "integer", minimum: 1 }, color: { type: "string", minLength: 1, maxLength: 255 }, yards: { type: "integer", minimum: 0 } } } as const;
+type StashBody = { productId?: number; color?: string; yards?: number };
+const byId = async (id: number) => (await stashQuery()).find((row) => row.yarnId === id);
 export const stashRoutes: FastifyPluginAsync = async (fastify) => {
-  // GET -> joined on product_id
-  fastify.get("/stash", async () => {
-    return db
-      .select({
-        yarnId: yarnStash.yarnId,
-        productId: yarnStash.productId,
-        color: yarnStash.color,
-        yards: yarnStash.yards,
-        product: {
-          productId: yarnProducts.productId,
-          brandId: yarnProducts.brandId,
-          name: yarnProducts.name,
-          weightId: yarnProducts.weightId,
-          fiberId: yarnProducts.fiberId,
-        },
-      })
-      .from(yarnStash)
-      .innerJoin(yarnProducts, eq(yarnStash.productId, yarnProducts.productId));
-  });
-
-  fastify.post(
-    "/stash",
-    {
-      schema: {
-        body: {
-          type: "object",
-          required: ["productId", "color", "yards"],
-          additionalProperties: false,
-          properties: {
-            productId: { type: "integer", minimum: 1 },
-            color: { type: "string", minLength: 1, maxLength: 255 },
-            yards: { type: "integer", minimum: 0 },
-          },
-        },
-      },
-    },
-    async (request, reply) => {
-      const body = request.body as { productId: number; color: string; yards: number };
-
-      const [created] = await db
-        .insert(yarnStash)
-        .values(body)
-        .returning();
-
-      reply.code(201);
-      return created;
-    }
-  );
-
-  // PATCH (you didn't constrain it to yards-only in this final spec; keeping it limited to yards+color+productId)
-  fastify.patch(
-    "/stash/:yarnId",
-    {
-      schema: {
-        params: {
-          type: "object",
-          required: ["yarnId"],
-          properties: { yarnId: { type: "integer", minimum: 1 } },
-        },
-        body: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            productId: { type: "integer", minimum: 1 },
-            color: { type: "string", minLength: 1, maxLength: 255 },
-            yards: { type: "integer", minimum: 0 },
-          },
-        },
-      },
-    },
-    async (request, reply) => {
-      const { yarnId } = request.params as { yarnId: number };
-      const body = request.body as { productId?: number; color?: string; yards?: number };
-
-      const [updated] = await db
-        .update(yarnStash)
-        .set(body)
-        .where(eq(yarnStash.yarnId, yarnId))
-        .returning();
-
-      if (!updated) return reply.code(404).send({ message: "Not found" });
-      return updated;
-    }
-  );
-
-  fastify.delete(
-    "/stash/:yarnId",
-    {
-      schema: {
-        params: {
-          type: "object",
-          required: ["yarnId"],
-          properties: { yarnId: { type: "integer", minimum: 1 } },
-        },
-      },
-    },
-    async (request, reply) => {
-      const { yarnId } = request.params as { yarnId: number };
-
-      const deleted = await db
-        .delete(yarnStash)
-        .where(eq(yarnStash.yarnId, yarnId))
-        .returning();
-
-      if (deleted.length === 0) return reply.code(404).send({ message: "Not found" });
-      return deleted[0];
-    }
-  );
+  fastify.get("/yarn-stash", async () => stashQuery());
+  fastify.post("/yarn-stash", { schema: { body: { ...stashBody, required: ["productId", "color", "yards"] } } }, async (request, reply) => { const [created] = await db.insert(yarnStash).values(request.body as Required<StashBody>).returning(); reply.code(201); return byId(created!.yarnId); });
+  fastify.patch("/yarn-stash/:yarnId", { schema: { params: { type: "object", required: ["yarnId"], properties: { yarnId: { type: "integer", minimum: 1 } } }, body: stashBody } }, async (request, reply) => { const { yarnId } = request.params as { yarnId: number }; const body = request.body as StashBody; if (!Object.keys(body).length) return reply.code(422).send({ message: "Validation failed" }); const [updated] = await db.update(yarnStash).set(body).where(eq(yarnStash.yarnId, yarnId)).returning(); return updated ? byId(updated.yarnId) : reply.code(404).send(notFound); });
+  fastify.delete("/yarn-stash/:yarnId", { schema: { params: { type: "object", required: ["yarnId"], properties: { yarnId: { type: "integer", minimum: 1 } } } } }, async (request, reply) => { const { yarnId } = request.params as { yarnId: number }; const removed = await db.delete(yarnStash).where(eq(yarnStash.yarnId, yarnId)).returning(); return removed.length ? reply.code(204).send() : reply.code(404).send(notFound); });
 };
