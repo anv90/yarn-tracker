@@ -16,15 +16,16 @@ is needed: the work is API completion, a web UI, validation, and tests.
 | Database | Existing PostgreSQL database | Persists the existing `yarn_stash`, `yarn_products`, `patterns`, `finished_projects`, and lookup tables; no schema changes are planned. |
 | Data access | Drizzle ORM with `pg` | Executes typed reads, joins, CRUD operations, and PostgreSQL error handling. |
 | Configuration | `dotenv` | Loads `DATABASE_URL` locally without committing credentials. |
-| Frontend | React with TypeScript, built by Vite | Provides the single-page UI, page routing, forms, table filtering, API calls, and the required cream/pink visual design. |
+| Frontend | React with TypeScript, built by Vite | Provides the single-page UI, dedicated pages, forms, table filtering, API calls, and the required cream/pink visual design. |
 | Frontend routing | React Router | Maps `/stash`, `/yarn-products`, `/patterns`, and `/finished-projects` to their screens and supports direct navigation. |
 | Styling | CSS Modules or a single global CSS layer | Defines reusable CSS custom properties and component styles without adding a design-system dependency. |
+| Action icons | `react-icons` | Supplies the pencil and trash-can icons for accessible inline Edit and Delete buttons. |
 | API tests | Vitest, Fastify `inject`, and a dedicated PostgreSQL test database | Tests routes without opening a network port and verifies real PostgreSQL constraints. |
 | UI tests | Vitest and React Testing Library | Tests forms, filters, conditional brand creation, reference panels, and error states in the browser UI. |
 | Quality checks | TypeScript compiler and ESLint | Type-checks and lints both the API and frontend source. |
 
-React, Vite, React Router, Vitest, and React Testing Library are implementation
-dependencies to add; the rest of the backend stack is already present in
+React, Vite, React Router, `react-icons`, Vitest, and React Testing Library are
+implementation dependencies to add; the rest of the backend stack is already present in
 `package.json`. Keep dependencies small: do not add a component library, ORM,
 or state-management framework because the required screens can use React state,
 the Fetch API, and CSS.
@@ -43,6 +44,17 @@ the Fetch API, and CSS.
 5. Add a React + TypeScript frontend built with Vite, React Router for the four
    pages, and configure Fastify to serve its production assets and history
    fallback so direct UI-route navigation works.
+6. Give each resource a dedicated page component and data lifecycle:
+
+   - `YarnStashPage.tsx`
+   - `YarnProductsPage.tsx`
+   - `PatternsPage.tsx`
+   - `FinishedProjectsPage.tsx`
+
+   Do not reuse a single stateful resource-page component for all routes. This
+   prevents a response for one table from rendering in another table after
+   navigation. Reuse stateless shared components such as `DataTable`,
+   `ColumnFilters`, `EmptyState`, `ConfirmDeleteDialog`, and form controls.
 
 **Done when:** the server starts, `GET /health` works, and a browser can load
 the app shell plus each of `/stash`, `/yarn-products`, `/patterns`, and
@@ -135,9 +147,16 @@ endpoint has its required joins.
 3. Apply alternating row styling to table bodies after filtering as well as on
    the initial list. Add a visible keyboard-focus indicator and verify text
    contrast in default, hover, and focus states.
-4. Create reusable components/utilities for API calls, loading and error states,
-   confirmation dialogs, editable forms, reference panels, and table rendering.
-5. Display API field errors next to form inputs and `409` dependency errors in
+4. Give the complete table surface rounded corners, including the table header
+   and final row. Use an outer wrapper with `border-radius` and `overflow: hidden`
+   so alternating row backgrounds stay within the rounded corners.
+5. Create reusable stateless components/utilities for API calls, loading and
+   error states, confirmation dialogs, editable forms, reference panels, table
+   rendering, and empty states.
+6. Use `react-icons` pencil and trash-can icons for the inline edit and delete
+   actions. Each icon-only button must have an `aria-label`, visible keyboard
+   focus, and a tooltip or equivalent text for pointer users.
+7. Display API field errors next to form inputs and `409` dependency errors in
    a clear, actionable message.
 
 **Done when:** each route uses the specified visual system and common loading,
@@ -155,6 +174,8 @@ error, delete-confirmation, and accessibility behavior.
    selection and show the product error. If brand creation returns `409`, reload
    brands and ask the user to select the existing one.
 5. Keep brand, weight, and fiber reference data visible while the form is open.
+6. If no products exist, render the empty-state message **“No yarn products
+   present.”** and an **Add yarn product** button instead of an empty table.
 
 ### Yarn Stash
 
@@ -163,6 +184,8 @@ error, delete-confirmation, and accessibility behavior.
 2. Populate the product selector using complete product labels and keep the
    joined Yarn Products reference list available in the form.
 3. Implement add, edit (pre-filled), and confirmed delete.
+4. If no stash entries exist, render **“No yarn stash data present.”** and an
+   **Add yarn** button instead of an empty table.
 
 ### Patterns
 
@@ -170,6 +193,8 @@ error, delete-confirmation, and accessibility behavior.
 2. Populate the recommended-weight selector and retain the weight reference
    panel in the form.
 3. Implement add, edit (pre-filled), and confirmed delete.
+4. If no patterns exist, render **“No patterns present.”** and an **Add pattern**
+   button instead of an empty table.
 
 ### Finished Projects
 
@@ -178,20 +203,32 @@ error, delete-confirmation, and accessibility behavior.
 2. Populate selectors from the fully joined stash list and pattern list; retain
    both reference panels while the form is open.
 3. Implement add, edit (pre-filled), and confirmed delete.
+4. If no finished projects exist, render **“No finished projects present.”** and
+   an **Add finished project** button instead of an empty table.
 
 **Done when:** every page has functional CRUD controls and forms give users
 enough existing data to choose valid relationships without memorizing IDs.
 
 ## 8. Add per-column table search
 
-1. Include one filter field for every visible data column on each of the four
-   resource tables; do not omit IDs or joined-name columns.
+1. Build filters from each page’s declared table columns only. Do not render a
+   filter for the inline Actions column or for data not displayed on that page.
+   The expected filter sets are:
+
+   - Yarn stash: ID, color, yards, product, brand, weight, fiber.
+   - Yarn products: ID, name, brand, weight, fiber.
+   - Patterns: ID, name, link, recommended weight, yardage.
+   - Finished projects: project ID, pattern, pattern weight, stash color, stash
+     yards, product, brand, product weight, fiber, notes.
 2. Implement case-insensitive substring matching for text and exact matching
    for numeric IDs and quantities.
 3. Combine populated filters with AND semantics and provide a clear-filters
    action.
 4. Apply filtering after each list refresh and ensure alternating row styles are
    based on the currently displayed result set.
+5. Show the applicable no-data message and Add button when the unfiltered data
+   set is empty. When filters produce no matches but records exist, show
+   **“No matching data.”** and retain the clear-filters and Add controls.
 
 **Done when:** any combination of column filters narrows the visible table
 correctly and clearing filters restores the full list.
@@ -206,10 +243,13 @@ correctly and clearing filters restores the full list.
 3. Test the two-call brand workflow: successful new brand then product write,
    duplicate brand handling, and a product failure after successful brand
    creation.
-4. Add frontend tests for pre-populated edit forms, reference panels, all
-   column filters, create-new-brand behavior, delete confirmation, and API error
+4. Add frontend tests proving each route has an isolated data lifecycle, so a
+   response from Yarn Stash cannot appear in the other three pages.
+5. Add frontend tests for pre-populated edit forms, reference panels, the exact
+   page-specific filter sets, empty states, no-match filtering, create-new-brand
+   behavior, icon-button accessible names, delete confirmation, and API error
    display.
-5. Run TypeScript compilation, linting, API tests, frontend tests, and a manual
+6. Run TypeScript compilation, linting, API tests, frontend tests, and a manual
    browser smoke test across all four pages and direct URL loads.
 
 ## Delivery sequence
@@ -218,6 +258,7 @@ Implement in this order to keep dependencies clear:
 
 1. App factory, route registration, shared validation/errors, and lookup APIs.
 2. Product and stash APIs, then pattern and finished-project APIs.
-3. Frontend shell, design tokens, and shared table/form components.
-4. Yarn Products, Yarn Stash, Patterns, and Finished Projects pages.
-5. Per-column filtering, automated tests, and final end-to-end verification.
+3. Frontend shell, design tokens, and stateless shared table/form components.
+4. Four dedicated table-page components and their resource-specific forms.
+5. Page-specific filtering, empty states, icon actions, automated tests, and
+   final end-to-end verification.

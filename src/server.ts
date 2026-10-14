@@ -10,10 +10,20 @@ import { patternsRoutes } from "./routes/patterns.js";
 import { yarnProductsRoutes } from "./routes/yarn_products.js";
 import { stashRoutes } from "./routes/yarn_stash.js";
 
+export const databaseErrorCode = (error: unknown): string | undefined => {
+  let current: unknown = error;
+  while (current && typeof current === "object") {
+    const candidate = current as { code?: unknown; cause?: unknown };
+    if (typeof candidate.code === "string") return candidate.code;
+    current = candidate.cause;
+  }
+  return undefined;
+};
+
 export const buildApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({ logger: true });
   app.setErrorHandler((error, _request, reply) => {
-    const code = (error as { code?: string }).code;
+    const code = databaseErrorCode(error);
     if (code === "23503") return reply.code(409).send({ message: "This record is still referenced by another record" });
     if (code === "23505") return reply.code(409).send({ message: "A record with those values already exists" });
     if ((error as { validation?: unknown }).validation) return reply.code(422).send({ message: "Validation failed", errors: (error as { validation: unknown }).validation });

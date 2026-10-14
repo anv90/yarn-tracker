@@ -1,11 +1,15 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { buildApp } from "./server.js";
+import { buildApp, databaseErrorCode } from "./server.js";
 
 let app: FastifyInstance | undefined;
 afterEach(async () => { await app?.close(); app = undefined; });
 
 describe("application routes", () => {
+  it("finds a PostgreSQL code nested inside a Drizzle error", () => {
+    expect(databaseErrorCode({ cause: { code: "23503" } })).toBe("23503");
+  });
+
   it("serves the health check without a database query", async () => {
     app = await buildApp();
     const response = await app.inject({ method: "GET", url: "/health" });
